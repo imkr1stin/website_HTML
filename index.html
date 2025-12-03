@@ -2,9 +2,255 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>楊芳瑜's Blog</title>
+    <!-- 引入 Google Fonts 字型，讓中文更好看 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 全域設定 --- */
+        :root {
+            --primary-color: #b5838d; /* 莫蘭迪粉 */
+            --secondary-color: #6d6875; /* 深灰紫 */
+            --bg-color: #fdfbf7; /* 溫暖米白 */
+            --card-bg: #ffffff;
+            --text-color: #4a4a4a;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary-color);
+            transition: 0.3s;
+        }
+
+        a:hover {
+            color: var(--secondary-color);
+        }
+
+        /* --- 頁頭與導覽列 --- */
+        header {
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; /* 固定在頂部 */
+            top: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 1rem 0;
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+            letter-spacing: 2px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        nav a {
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+
+        nav a:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* --- 主內容區排版 (CSS Grid) --- */
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 20px;
+            display: grid;
+            /* 定義兩欄：內容區(自動填滿) | 側邊欄(300px) */
+            grid-template-columns: 1fr 300px; 
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* --- 卡片通用樣式 --- */
+        article, aside, details {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            overflow: hidden; /* 防止內容溢出 */
+        }
+
+        /* 讓所有文章都在第一欄 */
+        article, details, iframe {
+            grid-column: 1 / 2;
+        }
+
+        /* 側邊欄設定 */
+        aside {
+            grid-column: 2 / 3;
+            grid-row: 1 / 2; /* 放在最右上角 */
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+        }
+        
+        aside h3 {
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        /* --- 標題美化 --- */
+        h2 {
+            border-left: 5px solid var(--primary-color);
+            padding-left: 15px;
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        mark {
+            background-color: #ffcdb2;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        /* --- 關於我 (個人資料) --- */
+        .profile-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .profile-table td {
+            vertical-align: middle;
+        }
+
+        /* 大頭貼樣式 */
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%; /* 變圓形 */
+            border: 4px solid var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        /* --- 表格樣式 (經歷與技能) --- */
+        table.styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        table.styled-table thead tr {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            text-align: left;
+        }
+
+        table.styled-table th, table.styled-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dddddd;
+        }
+
+        table.styled-table tbody tr:nth-of-type(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* --- 媒體區 (圖片、影片、地圖) --- */
+        img, video, iframe, embed {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .gallery {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .gallery figure {
+            margin: 0;
+            text-align: center;
+            flex: 1 1 300px; /* 彈性寬度 */
+        }
+        
+        .gallery img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.02);
+        }
+
+        figcaption {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #777;
+            font-style: italic;
+        }
+
+        /* --- 頁尾 --- */
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            font-size: 0.9rem;
+        }
+
+        /* --- 手機版響應式 (寬度小於 768px 時) --- */
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr; /* 變成單欄 */
+            }
+
+            aside {
+                grid-column: 1; /* 側邊欄移到內容流中 */
+                grid-row: auto;
+                order: -1; /* 讓側邊欄顯示在最上面 */
+            }
+
+            .profile-table td {
+                display: block;
+                text-align: center;
+            }
+            
+            .profile-img {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
+
     <!-- 頁頭區 -->
     <header>
         <h1>楊芳瑜的個人部落格</h1>
@@ -22,10 +268,12 @@
     <!-- 主內容區 -->
     <main>
         <!-- 側邊欄補充資訊 -->
-        <aside style="width:30%; float:right;">
+        <aside>
             <blockquote>
                 <h3>學習小貼士</h3>
-                <p>不懂就問</p>
+                <p>✨ 不懂就問</p>
+                <p>✨ 善用 AI 輔助</p>
+                <p>✨ 保持好奇心</p>
             </blockquote>
         </aside>
 
@@ -36,17 +284,23 @@
                 <p>在此部落格中，將分享我在生活中的點滴和我的興趣。</p>
             </header>
             <section>
-                <table cellspacing="20">
+             
+                <table class="profile-table">
                     <tr>
-                        <td><img src="capybara.jpg" alt="kristin picture"></td>
-                        <td><h1>kristin</h1><p>
-                            <em><strong><a href="https://www.ntue.edu.tw/">國立台北教育大學</a></strong>學生</em></p></td>
+                        <td style="width: 200px; text-align: center;">
+                           
+                            <img src="capybara.jpg" alt="kristin picture" class="profile-img">
+                        </td>
+                        <td>
+                            <h1 style="margin: 0; color: var(--primary-color);">Kristin</h1>
+                            <p>
+                                <em><strong><a href="https://www.ntue.edu.tw/" target="_blank">國立台北教育大學</a></strong> 學生</em>
+                            </p>
+                            <p>我是國北教的學生，會一些 <mark>操作AI</mark> 和 <mark>C語言</mark>，並致力於 <mark>深度學習</mark> 與 <mark>生成式 AI</mark> 目前還在努力學習中...</p>
+                            <p>此外，我喜愛穿搭、音樂與閱讀，希望將藝術與科技結合，為生活注入更多元的靈感與視野。</p>
+                        </td>
                     </tr>
                 </table>
-            </section>
-            <section>
-                <p>我是國北教的學生，會一些<mark>操作AI</mark> 和 <mark>C語言</mark>，並致力於 <mark>深度學習</mark> 與 <mark>生成式 AI </mark>目前還在努力學習中...</p>
-                <p>此外，我喜愛穿搭、音樂與閱讀，希望將藝術與科技結合，為生活注入更多元的靈感與視野。</p>
             </section>
         </article>
 
@@ -56,7 +310,7 @@
                 <h2>工作經歷</h2>
             </header>
             <section>
-                <table>
+                <table class="styled-table">
                     <thead>
                         <tr>
                             <th>Dates</th>
@@ -83,18 +337,18 @@
                 <h2>工作技能</h2>
             </header>
             <section>
-                <table>
+                <table class="styled-table">
                     <tr>
-                        <td>Java</td>
-                        <td>⭐⭐⭐</td>
+                        <td style="font-weight: bold;">Java</td>
+                        <td style="color: gold;">⭐⭐⭐</td>
                     </tr>
                     <tr>
-                        <td>C++</td>
-                        <td>⭐⭐⭐</td>
+                        <td style="font-weight: bold;">C++</td>
+                        <td style="color: gold;">⭐⭐⭐</td>
                     </tr>
                     <tr>
-                        <td>Python</td>
-                        <td>⭐⭐⭐⭐⭐</td>
+                        <td style="font-weight: bold;">Python</td>
+                        <td style="color: gold;">⭐⭐⭐⭐⭐</td>
                     </tr>
                 </table>
             </section>
@@ -103,66 +357,83 @@
         <!-- 音樂作品介紹 -->
         <article id="section4">
             <h2>喜歡的歌</h2>
-            <audio controls>
-                <!-- 改為你的作品 -->
-                <source src="likejennie.mp3" type="audio/mpeg">
-            </audio>
+            <div style="background: #f4f4f4; padding: 20px; border-radius: 10px; text-align: center;">
+                <p>🎵 現正播放：Like Jennie</p>
+                <audio controls style="width: 100%;">
+                    <!-- 請改回你的檔案名稱 -->
+                    <source src="likejennie.mp3" type="audio/mpeg">
+                  
+                </audio>
+            </div>
         </article>
 
         <!-- 視訊作品介紹 -->
         <article id="section5">
             <h2>喜歡的偶像作品</h2>
-            <video controls width="300">
-                <!-- 改為你的作品 -->
-                <source src="Clipto AI video downloader_ROSÉ - toxic till the end (OFFICIAL MUSIC VIDEO) (1).mp4" type="audio/mpeg">                
-            </video>
-            &nbsp;&nbsp;<!-- 添加間隔 -->
-            <video controls width="300">
-                <!-- 改為你的作品 -->
-                <source src="numberonegirl.mp4" type="video/mp4">
-            </video>
+            <div class="gallery">
+                <figure>
+                     <!-- 請改回你的檔案名稱 -->
+                    <video controls width="100%">
+                        <source src="Clipto AI video downloader_ROSÉ - toxic till the end (OFFICIAL MUSIC VIDEO) (1).mp4" type="video/mp4">                
+                    </video>
+                    <figcaption>Toxic till the end</figcaption>
+                </figure>
+                <figure>
+                     <!-- 請改回你的檔案名稱 -->
+                    <video controls width="100%">
+                        <source src="numberonegirl.mp4" type="video/mp4">
+                    </video>
+                    <figcaption>Number One Girl</figcaption>
+                </figure>
+            </div>
         </article>
 
         <!-- 圖片作品集介紹與描述 -->
         <article id="section6">
             <h2>穿搭</h2>
-            <figure style="display:inline-block;">
-                <!-- 改為你的作品 -->
-                <img src="fashion.jpg" alt="French outfit" width="450">
-                <figcaption>French outfit</figcaption>
-            </figure>
-            <figure style="display:inline-block;">
-                <!-- 改為你的作品 -->
-                <img src="fashion2.jpg" alt="Old money fashion outfit" width="450">
-                <figcaption>Old money fashion outfit</figcaption>
-            </figure>
+            <div class="gallery">
+                <figure>
+                    <img src="fashion.jpg" alt="French outfit">
+                    <figcaption>French outfit</figcaption>
+                </figure>
+                <figure>
+                   
+                    <img src="fashion2.jpg" alt="Old money fashion outfit">
+                    <figcaption>Old money fashion outfit</figcaption>
+                </figure>
+            </div>
         </article>
 
         <!-- 嵌入PDF文件 -->
         <article id="section7">
             <h2>更多資訊</h2>
-            <!-- 改為你的作品 -->
-            <embed src="Presentation.pdf" width="500" height="600">
+   
+            <embed src="Presentation.pdf" width="100%" height="600" style="border-radius: 8px;">
         </article>
 
         <!-- 互動元素 -->
         <details>
-            <summary>點擊查看學習提示</summary>
-            <p>建議攜帶筆記本與筆，方便隨時記錄課堂中的關鍵知識點與靈感。</p>
+            <summary style="cursor: pointer; font-weight: bold; color: var(--primary-color);">▼ 點擊查看學習提示</summary>
+            <p style="margin-top: 10px;">建議攜帶筆記本與筆，方便隨時記錄課堂中的關鍵知識點與靈感。</p>
         </details>
 
         <!-- 加入地圖 -->
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3615.2784024338266!2d121.54206247541927!3d25.02462437782254!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a908a8232611%3A0xeebfb2d71a5025c7!2z5ZyL56uL6Ie65YyX5pWZ6IKy5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1731827435609!5m2!1szh-TW!2stw" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>        
+        <!-- 包一個 div 來處理 RWD 寬度 -->
+        <div style="grid-column: 1 / -1; margin-top: 20px;">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3615.2784024338266!2d121.54206247541927!3d25.02462437782254!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a908a8232611%3A0xeebfb2d71a5025c7!2z5ZyL56uL6Ie65YyX5pWZ6IKy5aSn5a24!5e0!3m2!1szh-TW!2stw!4v1731827435609!5m2!1szh-TW!2stw" width="100%" height="450" style="border:0; border-radius: 12px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>        
+        </div>
+
     </main>
     
     <!-- 頁尾區 -->
     <footer>
         <p>聯絡我們：s111316006@stu.ntue.edu.tw</p>
         <time datetime="2024-11-17">最後更新日期：2024年11月17日</time>
+        <p>Copyright © 2024 Kristin. All rights reserved.</p>
     </footer>
 </body>
-
 </html>
+
 
 
 
