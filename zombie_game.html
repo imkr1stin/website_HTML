@@ -3,38 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>殭屍射擊訓練 - 楊芳瑜</title>
+    <title>殭屍射擊訓練 - 嵌入版</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Noto+Sans+TC:wght@500;900&display=swap');
 
         :root {
             --primary-color: #ff3333;
-            --bg-color: #1a1a1a;
-            --text-color: #ffffff;
         }
 
-        body {
+        /* 改良點 1: 使用 100% 而非 100vh，適應 iframe 大小 */
+        html, body {
             margin: 0;
             padding: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%; 
+            height: 100%; 
             background-color: #0f0f13;
             background-image: 
                 radial-gradient(#2a2a2a 1px, transparent 1px),
                 radial-gradient(#1f1f1f 1px, transparent 1px);
-            background-size: 50px 50px;
-            background-position: 0 0, 25px 25px;
-            overflow: hidden;
+            background-size: 30px 30px; /* 格線縮小 */
+            overflow: hidden; /* 強制隱藏捲軸 */
             font-family: 'Noto Sans TC', sans-serif;
             cursor: none; /* 隱藏預設滑鼠 */
             user-select: none;
+            position: relative;
         }
 
-        /* 自訂瞄準器 */
+        /* 瞄準器稍微縮小 */
         #cursor {
             position: fixed;
-            width: 60px;
-            height: 60px;
+            width: 40px; /* 60 -> 40 */
+            height: 40px;
             border: 2px solid var(--primary-color);
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -45,29 +44,15 @@
         }
 
         #cursor::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background-color: var(--primary-color);
+            content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background-color: var(--primary-color);
         }
-
         #cursor::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 0;
-            width: 1px;
-            height: 100%;
-            background-color: var(--primary-color);
+            content: ''; position: absolute; left: 50%; top: 0; width: 1px; height: 100%; background-color: var(--primary-color);
         }
 
         #cursor-dot {
             position: fixed;
-            width: 6px;
-            height: 6px;
+            width: 4px; height: 4px;
             background-color: var(--primary-color);
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -75,304 +60,159 @@
             z-index: 10000;
         }
 
-        /* 遊戲區域 */
-        #game-area {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        /* UI 介面 */
-        .ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none; /* 讓點擊穿透到遊戲層 */
-        }
-
-        /* 左上角名字 */
+        /* 名字縮小並靠齊 */
         #player-name {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
+            top: 10px;
+            left: 10px;
+            font-size: 14px; /* 字體縮小 */
             color: #fff;
             background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
+            padding: 5px 15px;
             border-radius: 8px;
-            border-left: 5px solid var(--primary-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 900;
+            border-left: 3px solid var(--primary-color);
+            z-index: 20;
         }
 
-        /* 頂部 HUD */
+        /* HUD 介面優化 */
         .hud {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 10px;
+            right: 10px;
             display: flex;
-            gap: 20px;
+            gap: 10px;
+            z-index: 20;
         }
 
         .stat-box {
             background: rgba(0, 0, 0, 0.8);
-            padding: 10px 25px;
-            border-radius: 8px;
+            padding: 5px 15px;
+            border-radius: 6px;
             color: #fff;
-            font-size: 20px;
             border: 1px solid #444;
-            min-width: 120px;
+            min-width: 80px;
             text-align: center;
         }
 
-        .stat-label {
-            font-size: 12px;
-            color: #888;
-            display: block;
-            margin-bottom: 5px;
-        }
+        .stat-label { font-size: 10px; color: #888; display: block; }
+        .stat-value { font-size: 20px; font-weight: bold; font-family: monospace; }
 
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            font-family: 'Courier New', Courier, monospace;
-        }
+        #time-value { color: #ffa500; }
+        #time-value.danger { color: #ff3333; animation: pulse 0.5s infinite; }
 
-        #time-value {
-            color: #ffa500;
-        }
-        
-        #time-value.danger {
-            color: #ff3333;
-            animation: pulse 0.5s infinite;
-        }
-
-        /* 殭屍樣式 */
+        /* 殭屍大小適配 */
         .zombie {
             position: absolute;
-            width: 80px;
-            height: 80px;
-            font-size: 70px;
-            line-height: 80px;
+            width: 60px;
+            height: 60px;
+            font-size: 50px; /* 字體縮小 70 -> 50 */
+            line-height: 60px;
             text-align: center;
             cursor: none;
-            user-select: none;
             animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
-            transition: transform 0.1s;
             z-index: 5;
         }
 
-        .zombie:active {
-            transform: scale(0.9);
-        }
+        .zombie:active { transform: scale(0.9); }
+        .zombie.dead { animation: die 0.2s forwards; pointer-events: none; }
+        .score-popup { position: absolute; color: #ffd700; font-weight: bold; font-size: 20px; pointer-events: none; animation: floatUp 0.8s forwards; z-index: 6; }
 
-        .zombie.dead {
-            animation: die 0.2s forwards;
-            pointer-events: none;
-        }
-
-        /* 分數飄字 */
-        .score-popup {
-            position: absolute;
-            color: #ffd700;
-            font-weight: bold;
-            font-size: 24px;
-            pointer-events: none;
-            animation: floatUp 0.8s forwards;
-            z-index: 6;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
-
-        /* 選單畫面 (開始/結束) */
+        /* 選單畫面優化 */
         #menu-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 100;
-            pointer-events: auto;
-            backdrop-filter: blur(5px);
         }
 
+        /* 標題不會大到爆框 */
         h1 {
             font-family: 'Creepster', cursive;
             color: var(--primary-color);
-            font-size: 80px;
-            margin: 0 0 20px 0;
-            text-shadow: 0 0 20px rgba(255, 51, 51, 0.5);
-            letter-spacing: 5px;
+            font-size: 50px; /* 80 -> 50 */
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+            letter-spacing: 3px;
+            text-align: center;
         }
+
+        p { font-size: 14px; color: #aaa; margin-bottom: 20px; }
 
         .btn {
             background: linear-gradient(45deg, #cc0000, #ff3333);
-            border: none;
-            padding: 15px 50px;
-            color: white;
-            font-size: 24px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+            border: none; padding: 10px 30px; color: white;
+            font-size: 18px; border-radius: 50px;
+            cursor: pointer; font-weight: bold;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
             transition: all 0.2s;
-            text-transform: uppercase;
-            margin-top: 20px;
-            pointer-events: auto; /* 確保按鈕可點擊 */
         }
-
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        #final-score {
-            font-size: 32px;
-            color: white;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        /* 動畫 Keyframes */
-        @keyframes popUp {
-            from { transform: scale(0); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes die {
-            0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.2); filter: brightness(2) hue-rotate(90deg); }
-            100% { transform: scale(0); opacity: 0; }
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
+        .btn:hover { transform: scale(1.05); }
+        
+        @keyframes popUp { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes die { 0% { transform: scale(1); } 50% { transform: scale(1.2); filter: brightness(2) hue-rotate(90deg); } 100% { transform: scale(0); opacity: 0; } }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-30px); opacity: 0; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-
-    <!-- 遊戲瞄準器 -->
     <div id="cursor"></div>
     <div id="cursor-dot"></div>
-
-    <!-- 左上角名字 -->
     <div id="player-name">創作者:楊芳瑜</div>
-
-    <!-- HUD -->
-    <div class="ui-layer">
-        <div class="hud">
-            <div class="stat-box">
-                <span class="stat-label">時間</span>
-                <span id="time-value" class="stat-value">30</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">分數</span>
-                <span id="score-value" class="stat-value">0</span>
-            </div>
+    <div class="hud">
+        <div class="stat-box">
+            <span class="stat-label">時間</span><span id="time-value">30</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">分數</span><span id="score-value">0</span>
         </div>
     </div>
-
-    <!-- 遊戲互動區 -->
     <div id="game-area"></div>
-
-    <!-- 選單畫面 -->
     <div id="menu-screen">
         <h1>ZOMBIE SHOOTER</h1>
-        <p style="color: #aaa; font-size: 18px; margin-bottom: 30px;">保護基地！30秒內消滅越多殭屍越好</p>
-        <div id="final-score">最終分數: 0</div>
+        <p>保護基地！30秒內消滅越多殭屍越好</p>
+        <div id="final-score" style="color:white; font-size: 24px; margin-bottom: 15px; display:none;"></div>
         <button class="btn" onclick="game.start()">開始遊戲</button>
     </div>
 
     <script>
-        // 音效管理器 (使用 Web Audio API 生成音效，不需外部檔案)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
         function playShootSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
-
         function playHitSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-            osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // 遊戲邏輯
         const game = {
-            score: 0,
-            time: 30,
-            isPlaying: false,
-            timerInterval: null,
-            spawnInterval: null,
+            score: 0, time: 30, isPlaying: false, timerInterval: null,
             gameArea: document.getElementById('game-area'),
             scoreDisplay: document.getElementById('score-value'),
             timeDisplay: document.getElementById('time-value'),
             menuScreen: document.getElementById('menu-screen'),
             finalScoreDisplay: document.getElementById('final-score'),
-            zombieTypes: ['🧟', '🧟‍♂️', '🧟‍♀️'], // 殭屍 Emoji
-
+            zombieTypes: ['🧟', '🧟‍♂️', '🧟‍♀️'],
+            
             init: function() {
-                // 自訂滑鼠跟隨
+                // 修正：在 iframe 中 mousemove 需要更精確
                 document.addEventListener('mousemove', (e) => {
                     const cursor = document.getElementById('cursor');
                     const dot = document.getElementById('cursor-dot');
+                    // 直接使用 clientX/Y，這在 iframe 內部是相對於 iframe 左上角的
                     cursor.style.left = e.clientX + 'px';
                     cursor.style.top = e.clientY + 'px';
                     dot.style.left = e.clientX + 'px';
                     dot.style.top = e.clientY + 'px';
                 });
-
-                // 全局點擊 (射擊空槍)
                 document.addEventListener('mousedown', () => {
                     if(this.isPlaying) {
                         playShootSound();
@@ -382,130 +222,67 @@
                     }
                 });
             },
-
             start: function() {
-                this.score = 0;
-                this.time = 30;
-                this.isPlaying = true;
-                
-                this.updateUI();
-                this.gameArea.innerHTML = ''; // 清空場景
+                this.score = 0; this.time = 30; this.isPlaying = true;
+                this.updateUI(); this.gameArea.innerHTML = '';
                 this.menuScreen.classList.add('hidden');
                 this.timeDisplay.classList.remove('danger');
-                
-                // 啟動計時器
                 this.timerInterval = setInterval(() => {
-                    this.time--;
-                    this.updateUI();
-                    
-                    if(this.time <= 5) {
-                        this.timeDisplay.classList.add('danger');
-                    }
-
-                    if (this.time <= 0) {
-                        this.end();
-                    }
+                    this.time--; this.updateUI();
+                    if(this.time <= 5) this.timeDisplay.classList.add('danger');
+                    if (this.time <= 0) this.end();
                 }, 1000);
-
-                // 啟動殭屍生成 (隨著時間稍微加快)
                 this.spawnLoop();
             },
-
             spawnLoop: function() {
                 if (!this.isPlaying) return;
-
                 this.spawnZombie();
-
-                // 根據剩餘時間調整生成速度，越後面越快
-                let nextSpawnTime = Math.random() * 800 + 400; // 0.4s - 1.2s
+                let nextSpawnTime = Math.random() * 800 + 400;
                 if (this.time < 10) nextSpawnTime = Math.random() * 500 + 200;
-
                 setTimeout(() => this.spawnLoop(), nextSpawnTime);
             },
-
             spawnZombie: function() {
                 const zombie = document.createElement('div');
                 zombie.classList.add('zombie');
                 zombie.innerText = this.zombieTypes[Math.floor(Math.random() * this.zombieTypes.length)];
                 
-                // 隨機位置 (扣除邊界)
-                const maxX = window.innerWidth - 100;
-                const maxY = window.innerHeight - 100;
-                const randomX = Math.random() * (maxX - 100) + 50;
-                const randomY = Math.random() * (maxY - 100) + 150; // 避開頂部 HUD
+                // 修正：使用 document.body.clientWidth 確保不會生在框框外
+                const maxX = document.body.clientWidth - 60; 
+                const maxY = document.body.clientHeight - 60;
+                
+                const randomX = Math.random() * (maxX - 20) + 10;
+                const randomY = Math.random() * (maxY - 80) + 60; // 避開 HUD
 
                 zombie.style.left = randomX + 'px';
                 zombie.style.top = randomY + 'px';
+                zombie.style.transform = `scale(${0.8 + Math.random() * 0.4})`; // 稍微縮小 scale
                 
-                // 隨機大小變化
-                const scale = 0.8 + Math.random() * 0.5;
-                zombie.style.transform = `scale(${scale})`;
-
-                // 點擊事件
-                zombie.onmousedown = (e) => {
-                    e.stopPropagation(); // 防止觸發背景點擊
-                    this.hitZombie(zombie, e.clientX, e.clientY);
-                };
-
+                zombie.onmousedown = (e) => { e.stopPropagation(); this.hitZombie(zombie, e.clientX, e.clientY); };
                 this.gameArea.appendChild(zombie);
-
-                // 殭屍存活時間，時間到自動消失
-                setTimeout(() => {
-                    if (zombie.parentNode && !zombie.classList.contains('dead')) {
-                        zombie.remove();
-                    }
-                }, 2000 + Math.random() * 1000);
+                setTimeout(() => { if (zombie.parentNode && !zombie.classList.contains('dead')) zombie.remove(); }, 2000 + Math.random() * 1000);
             },
-
             hitZombie: function(element, x, y) {
                 if (!this.isPlaying || element.classList.contains('dead')) return;
-
-                playHitSound();
-                this.score++;
-                this.updateUI();
-
-                // 視覺效果
-                element.classList.add('dead');
-                this.showScorePopup(x, y);
-
-                // 移除元素
-                setTimeout(() => {
-                    if (element.parentNode) element.remove();
-                }, 200);
+                playHitSound(); this.score++; this.updateUI();
+                element.classList.add('dead'); this.showScorePopup(x, y);
+                setTimeout(() => { if (element.parentNode) element.remove(); }, 200);
             },
-
             showScorePopup: function(x, y) {
                 const popup = document.createElement('div');
-                popup.innerText = "+1";
-                popup.classList.add('score-popup');
-                popup.style.left = x + 'px';
-                popup.style.top = y + 'px';
+                popup.innerText = "+1"; popup.classList.add('score-popup');
+                popup.style.left = x + 'px'; popup.style.top = y + 'px';
                 this.gameArea.appendChild(popup);
-                
                 setTimeout(() => popup.remove(), 800);
             },
-
-            updateUI: function() {
-                this.scoreDisplay.innerText = this.score;
-                this.timeDisplay.innerText = this.time;
-            },
-
+            updateUI: function() { this.scoreDisplay.innerText = this.score; this.timeDisplay.innerText = this.time; },
             end: function() {
-                this.isPlaying = false;
-                clearInterval(this.timerInterval);
-                
+                this.isPlaying = false; clearInterval(this.timerInterval);
                 this.menuScreen.classList.remove('hidden');
                 this.finalScoreDisplay.style.display = 'block';
                 this.finalScoreDisplay.innerText = `時間到！ 得分: ${this.score}`;
-                
-                // 顯示原本滑鼠以便點擊按鈕
-                // document.body.style.cursor = 'default';
             }
         };
-
-        // 初始化
         game.init();
-
     </script>
 </body>
 </html>
